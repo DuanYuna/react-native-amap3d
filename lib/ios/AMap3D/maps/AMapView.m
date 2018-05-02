@@ -8,11 +8,14 @@
 
 @implementation AMapView {
     NSMutableDictionary *_markers;
+    NSMutableArray *_markersArray;
+
     MAUserLocationRepresentation *_locationStyle;
 }
 
 - (instancetype)init {
     _markers = [NSMutableDictionary new];
+    _markersArray=[NSMutableArray new];
     self = [super init];
     return self;
 }
@@ -66,8 +69,18 @@
         AMapMarker *marker = (AMapMarker *) subview;
         marker.mapView = self;
         _markers[[@(marker.annotation.hash) stringValue]] = marker;
+        [_markersArray addObject:marker.annotation];
         dispatch_async(dispatch_get_main_queue(), ^{
             [self addAnnotation:marker.annotation];
+            if (_markersArray.count == 1) {
+                [self setCenterCoordinate:[_markersArray[0] coordinate]];
+                [self setZoomLevel:15.1 animated:YES];
+            }
+            //如果有多个结果, 设置地图使所有的annotation都可见
+            else {
+                [self showAnnotations:_markersArray animated:YES];
+            }
+            
         });
     }
     if ([subview isKindOfClass:[AMapOverlay class]]) {
