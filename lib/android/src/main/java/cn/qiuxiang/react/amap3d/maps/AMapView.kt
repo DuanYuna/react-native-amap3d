@@ -19,7 +19,6 @@ import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
 import com.amap.api.maps.model.LatLngBounds
-import com.autonavi.amap.mapcore.Inner_3dMap_location
 
 
 class AMapView(context: Context) : TextureMapView(context) {
@@ -55,7 +54,6 @@ class AMapView(context: Context) : TextureMapView(context) {
             event.putDouble("accuracy", location.accuracy.toDouble())
             event.putDouble("altitude", location.altitude)
             event.putDouble("speed", location.speed.toDouble())
-            event.putString("address", (location as Inner_3dMap_location).address)
             event.putInt("timestamp", location.time.toInt())
             emit(id, "onLocation", event)
         }
