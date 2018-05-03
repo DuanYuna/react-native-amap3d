@@ -6,7 +6,7 @@ import cn.qiuxiang.react.amap3d.toLatLng
 import cn.qiuxiang.react.amap3d.toLatLngBounds
 import cn.qiuxiang.react.amap3d.toWritableMap
 import com.amap.api.maps.AMap
-import com.amap.api.maps.CameraUpdateFactory
+import com.amap.api.maps.CameraUpdateFactory.*
 import com.amap.api.maps.TextureMapView
 import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.CameraPosition
@@ -18,10 +18,18 @@ import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
+import com.amap.api.maps.model.LatLngBounds
+
+
+
+
+
+
 
 class AMapView(context: Context) : TextureMapView(context) {
     private val eventEmitter: RCTEventEmitter = (context as ThemedReactContext).getJSModule(RCTEventEmitter::class.java)
     private val markers = HashMap<String, AMapMarker>()
+    private var markersList:MutableList<AMapMarker> = ArrayList()
     private val lines = HashMap<String, AMapPolyline>()
     private val locationStyle by lazy {
         val locationStyle = MyLocationStyle()
@@ -131,6 +139,14 @@ class AMapView(context: Context) : TextureMapView(context) {
             child.add(map)
             if (child is AMapMarker) {
                 markers[child.marker?.id!!] = child
+                markersList.add(child)
+                val boundsBuilder = LatLngBounds.Builder()//存放所有点的经纬度
+                //把所有点都include进去（LatLng类型）
+                for (i in 0 until markersList.size) {
+                    boundsBuilder.include(markersList[i].position)
+                }
+                map.animateCamera(newLatLngBounds(boundsBuilder.build(), 15))//第二个参数为四周留空宽度
+
             }
             if (child is AMapPolyline) {
                 lines[child.polyline?.id!!] = child
@@ -186,13 +202,13 @@ class AMapView(context: Context) : TextureMapView(context) {
             rotation = target.getDouble("rotation").toFloat()
         }
 
-        val cameraUpdate = CameraUpdateFactory.newCameraPosition(
+        val cameraUpdate = newCameraPosition(
                 CameraPosition(coordinate, zoomLevel, tilt, rotation))
         map.animateCamera(cameraUpdate, duration.toLong(), animateCallback)
     }
 
     fun setRegion(region: ReadableMap) {
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(region.toLatLngBounds(), 0))
+        map.moveCamera(newLatLngBounds(region.toLatLngBounds(), 0))
     }
 
     fun setLimitRegion(region: ReadableMap) {
@@ -228,3 +244,9 @@ class AMapView(context: Context) : TextureMapView(context) {
         }
     }
 }
+
+
+
+
+
+
